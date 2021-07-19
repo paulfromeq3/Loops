@@ -64,6 +64,8 @@ class EntryPoint
         string[] items = new string[10];  // This is the array that we'll work with.  It will have 10 items.
         items[0] = "apple";
         items[1] = "orange";
+        //string[] tempArray = new string[10];  // Assign this in Case 3. This array is used to resort the items[] array to take out the null values
+
 
         string fruit = null;
         bool exit = false;
@@ -72,69 +74,35 @@ class EntryPoint
         Console.WriteLine(menu);
         while (!exit)
         {
-            Console.Write("Your selection (1-5):  ");
+            Console.Write("Your choice:  ");
             int userChoice = Convert.ToInt32(Console.ReadLine());
             Console.WriteLine();
+
+            // NOTE:  For each case below, I highlighted and hit control-r-m to extract a method from the code
+            // This is the first time I've created a method in C#, and first time using the shortcut
+            // So far, it seems to work ok
+            // I simply selected everything in between "case" and "break"
+
             switch (userChoice)
             {
                 case 1:
-                    // Add an item
-                    // First, iterate through the array to find the next available index
-                    for (int i = 0; i < items.Length; i++)
-                    {
-                        if (items[i] == null)  // null means there's nothing there in that index position
-                        {
-                            Console.WriteLine("Enter the name of a fruit:  ");
-                            fruit = Console.ReadLine();
-                            items[i] = fruit;
-                            break;
-                        }
-                    }
+                    fruit = AddAnItem(items, fruit);
                     break;
 
                 case 2:
-                    // Edit an item
-                    for (int i = 0; i < items.Length; i++)
-                    {
-                        Console.WriteLine($"{i}  {items[i]}");
-                    }
-                    Console.WriteLine();
-                    Console.Write("Which item number do you want to edit? # ");
-                    selectedItem = Convert.ToInt32(Console.ReadLine());
-                    Console.Write($"Edit item #{selectedItem} {items[selectedItem]} to what? -->  ");
-                    fruit = Console.ReadLine();
-                    items[selectedItem] = fruit;
-                    Console.Write("Press enter to continue: ");
-                    Console.ReadLine();
+                    selectedItem = EditAnItem(items, ref fruit);
                     break;
 
                 case 3:
-                    // Remove an item
-                    for (int i = 0; i < items.Length; i++)
-                    {
-                        Console.WriteLine($"{i} {items[i]}");
-                    }
-                    Console.Write("Enter the index number to remove an item: ");
-                    selectedItem = Convert.ToInt32(Console.ReadLine());
-                    items[selectedItem] = null;
-                    Console.Write("Press enter to continue");
-                    Console.ReadLine();
+                    selectedItem = RemoveItem(items);
                     break;
 
                 case 4:
-                    // View all current items
-                    for (int i = 0; i < items.Length; i++)
-                    {
-                        Console.WriteLine($"{i} {items[i]}");
-                    }
-                    Console.Write("Press enter to continue");
-                    Console.ReadLine();
+                    ViewAllItems(items);
                     break;
 
                 case 5:
-                    // Exit
-                    Console.WriteLine("You chose to exit");
-                    exit = true;
+                    exit = WantToExit();
                     break;
 
                 default:
@@ -146,5 +114,129 @@ class EntryPoint
 
         }
 
+    }
+
+    private static string AddAnItem(string[] items, string fruit)
+    {
+        // Add an item
+        // First, iterate through the array to find the next available index
+        for (int i = 0; i < items.Length; i++)
+        {
+            if (items[i] == null)  // null means there's nothing there in that index position
+            {
+                Console.WriteLine("Enter the name of a fruit:  ");
+                fruit = Console.ReadLine();
+                items[i] = fruit;
+                break;
+            }
+        }
+
+        return fruit;
+    }
+
+    private static int EditAnItem(string[] items, ref string fruit)
+    {
+        int selectedItem;
+        // Edit an item
+        for (int i = 0; i < items.Length; i++)
+        {
+            if (items[i] != null)
+            {
+                Console.WriteLine($"{i + 1}.  {items[i]}");
+
+            }
+        }
+        Console.WriteLine();
+        Console.Write("Which item number do you want to edit? # ");
+        selectedItem = Convert.ToInt32(Console.ReadLine());
+
+        if ((selectedItem - 1 >= 0) && (selectedItem < items.Length) && (items[selectedItem - 1] != null))
+        {
+            Console.Write("Please enter a new fruit to substitute for ");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write($"{items[selectedItem - 1]}");
+            Console.ResetColor();
+            Console.Write(" : ");
+            fruit = Console.ReadLine();
+            items[selectedItem - 1] = fruit;
+        }
+        else
+        {
+            Console.WriteLine("Selection is invalid");
+        }
+
+        Console.Write("\nPress enter to continue: ");
+        Console.ReadLine();
+        return selectedItem;
+    }
+
+    private static bool WantToExit()
+    {
+        bool exit;
+        // Exit
+        Console.WriteLine("You chose to exit");
+        exit = true;
+        return exit;
+    }
+
+    private static void ViewAllItems(string[] items)
+    {
+        // View all current items
+        // But don't show the null items of the array
+        for (int i = 0; i < items.Length; i++)
+        {
+            if (items[i] != null)
+            {
+                Console.WriteLine($"{i + 1}. {items[i]}");
+            }
+        }
+        Console.Write("\nPress enter to continue");
+        Console.ReadLine();
+    }
+
+    private static int RemoveItem(string[] items)
+    {
+        // Remove an item
+        int selectedItem = 0;
+        for (int i = 0; i < items.Length; i++)
+        {
+            if (items[i] != null)
+            {
+                Console.WriteLine($"{i + 1}. {items[i]}");
+            }
+        }
+
+        Console.Write("Enter the index number to remove an item: ");
+        selectedItem = Convert.ToInt32(Console.ReadLine());
+        if ((selectedItem - 1 >= 0) && (selectedItem <= items.Length) && (items[selectedItem - 1] != null))
+        {
+            items[selectedItem - 1] = null;
+            string[] tempArray = new string[10];
+            int simpleCounter = 0;
+            for (int j = 0; j < items.Length; j++)
+            {
+                if (items[j] != null)
+                {
+                    tempArray[simpleCounter] = items[j];
+                    simpleCounter++;
+                }
+            }
+            //// This is one method to copy the temporary array back to the main array
+            //for (int j = 0; j < tempArray.Length; j++)
+            //{
+            //    items[j] = tempArray[j];
+            //}
+
+            // This is another method to copy one array to another
+            Array.Copy(tempArray, items, tempArray.Length);
+
+        }
+        else
+        {
+            Console.WriteLine("Selection is invalid");
+        }
+        Console.Write("\nPress enter to continue");
+        Console.ReadLine();
+        return selectedItem;
     }
 }
